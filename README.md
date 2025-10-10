@@ -135,14 +135,6 @@ See [init_db.sql](scripts/init_db.sql) for complete schema.
 4. **Aggregate**: Calculate daily statistics
 5. **Monitor**: Track success/failure in Airflow
 
-## 🎯 Key Insights Generated
-
-- 📊 Most popular video categories
-- 🕐 Best time to publish for trending
-- 📈 View count trends over time
-- ⭐ Top performing channels
-- 💬 Engagement rate analysis
-
 ## 🧪 Testing
 
 ```bash
