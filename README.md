@@ -202,7 +202,6 @@ Check [STEP_BY_STEP_GUIDE.md](STEP_BY_STEP_GUIDE.md) for detailed troubleshootin
 
 ## 📚 Documentation
 
-- [Step-by-Step Setup Guide](STEP_BY_STEP_GUIDE.md)
 - [API Documentation](https://developers.google.com/youtube/v3)
 - [Airflow Documentation](https://airflow.apache.org/docs/)
 - [Superset Documentation](https://superset.apache.org/docs/intro)
@@ -219,7 +218,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License 
 
 ## 👤 Author
 
