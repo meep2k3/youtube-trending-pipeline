@@ -58,10 +58,10 @@ This project demonstrates an end-to-end data pipeline using modern data engineer
 ## 📸 Screenshots
 
 ### Airflow DAG
-![Airflow DAG](screenshots/airflow-dag.png)
+![Airflow DAG](dashboards/airflow-dag-img.bmp)
 
 ### Superset Dashboard
-![Dashboard](screenshots/superset-dashboard.png)
+![Dashboard](dashboards/youtube-2025-10-10T08-53-37.364Z.jpg)
 
 ## 🚀 Quick Start
 
@@ -183,13 +183,6 @@ schedule_interval='0 9 * * *'  # Daily at 9 AM
 # Change to: '0 */6 * * *' for every 6 hours
 ```
 
-### Add More Regions
-
-Edit `dags/youtube_trending_dag.py`:
-```python
-regions = ['VN', 'US', 'GB', 'JP', 'KR']
-```
-
 ## 🐛 Troubleshooting
 
 ### Containers won't start
@@ -239,7 +232,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👤 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/meep2k3)
+- GitHub: [@meep2k3](https://github.com/meep2k3)
 - Email: vinhquyen0401@gmail.com
 
 ## 🙏 Acknowledgments
