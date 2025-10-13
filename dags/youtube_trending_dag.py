@@ -77,20 +77,6 @@ def fetch_us_trending():
     run_etl(region_code='US', max_results=50)
 
 
-def fetch_global_trending():
-    """Fetch trending videos globally (multiple regions)"""
-    print("Fetching trending videos for multiple regions")
-    regions = ['VN', 'US', 'GB', 'JP', 'KR']
-    
-    for region in regions:
-        try:
-            print(f"Fetching for region: {region}")
-            run_etl(region_code=region, max_results=30)
-        except Exception as e:
-            print(f"Failed to fetch for {region}: {e}")
-            continue
-
-
 def generate_daily_report():
     """Generate daily analytics report"""
     import mysql.connector
@@ -149,7 +135,7 @@ task_fetch_vn = PythonOperator(
     dag=dag,
 )
 
-# Task 3: Fetch trending videos for US (optional)
+# Task 3: Fetch trending videos for US 
 task_fetch_us = PythonOperator(
     task_id='fetch_us_trending',
     python_callable=fetch_us_trending,
@@ -177,28 +163,3 @@ task_quality_check = BashOperator(
 
 # Define task dependencies
 [task_check_api, task_check_db] >> task_fetch_vn >> task_fetch_us >> task_quality_check >> task_report
-
-
-# Alternative DAG for multiple regions (uncomment to use)
-"""
-with DAG(
-    'youtube_trending_multi_region',
-    default_args=default_args,
-    description='Fetch trending videos from multiple regions',
-    schedule_interval='0 10 * * *',
-    catchup=False,
-    tags=['youtube', 'etl', 'multi-region'],
-) as dag_multi:
-    
-    fetch_global = PythonOperator(
-        task_id='fetch_global_trending',
-        python_callable=fetch_global_trending,
-    )
-    
-    report = PythonOperator(
-        task_id='generate_report',
-        python_callable=generate_daily_report,
-    )
-    
-    fetch_global >> report
-"""
