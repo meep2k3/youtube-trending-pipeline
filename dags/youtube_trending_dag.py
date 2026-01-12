@@ -149,4 +149,4 @@ task_quality_check = BashOperator(
 )
 
 # Define task dependencies
-[task_check_api, task_check_db] >> task_fetch_vn >> task_fetch_us >> task_quality_check >> task_report
+[task_check_api, task_check_db] >> task_fetch_vn >> task_quality_check >> task_report
