@@ -71,12 +71,6 @@ def fetch_vietnam_trending():
     run_etl(region_code='VN', max_results=50)
 
 
-def fetch_us_trending():
-    """Fetch trending videos for United States"""
-    print("Fetching trending videos for United States (US)")
-    run_etl(region_code='US', max_results=50)
-
-
 def generate_daily_report():
     """Generate daily analytics report"""
     import mysql.connector
@@ -135,21 +129,14 @@ task_fetch_vn = PythonOperator(
     dag=dag,
 )
 
-# Task 3: Fetch trending videos for US 
-task_fetch_us = PythonOperator(
-    task_id='fetch_us_trending',
-    python_callable=fetch_us_trending,
-    dag=dag,
-)
-
-# Task 4: Generate daily report
+# Task 3: Generate daily report
 task_report = PythonOperator(
     task_id='generate_daily_report',
     python_callable=generate_daily_report,
     dag=dag,
 )
 
-# Task 5: Data quality check
+# Task 4: Data quality check
 task_quality_check = BashOperator(
     task_id='data_quality_check',
     bash_command='''
