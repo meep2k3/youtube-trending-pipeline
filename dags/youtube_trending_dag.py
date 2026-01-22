@@ -1,12 +1,6 @@
-"""
-Airflow DAG for YouTube Trending Videos ETL Pipeline
-Runs daily to fetch and store trending videos data
-"""
-
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.bash import BashOperator
 import sys
 import os
 
@@ -14,139 +8,48 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
 
 # Import ETL function
-from etl_youtube import run_etl
+from etl_youtube import extract_to_datalake, load_from_datalake_to_warehouse
 
 # Default arguments for the DAG
 default_args = {
     'owner': 'data_engineer',
     'depends_on_past': False,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 2,
+    'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'start_date': datetime(2025, 1, 1),
 }
 
 # Define the DAG
-dag = DAG(
+with DAG(
     'youtube_trending_pipeline',
     default_args=default_args,
     description='ETL pipeline for YouTube trending videos',
     schedule_interval='0 9 * * *',  # Run daily at 9 AM
     catchup=False,
-    tags=['youtube', 'etl', 'trending'],
-)
-
-
-def check_api_key():
-    """Check if YouTube API key is configured"""
-    api_key = os.getenv('YOUTUBE_API_KEY')
-    if not api_key or api_key == 'YOUR_YOUTUBE_API_KEY_HERE':
-        raise ValueError("YouTube API key is not configured properly!")
-    print(f"API key configured: {api_key[:10]}...")
-
-
-def check_database_connection():
-    """Check MySQL database connectivity"""
-    import mysql.connector
-    from mysql.connector import Error
+    tags=['youtube', 'scd_type_2', 'datalake']
+) as dag:
     
-    try:
-        connection = mysql.connector.connect(
-            host=os.getenv('MYSQL_HOST', 'mysql'),
-            database=os.getenv('MYSQL_DATABASE', 'youtube_trending'),
-            user=os.getenv('MYSQL_USER', 'youtube_user'),
-            password=os.getenv('MYSQL_PASSWORD', 'youtube_pass123')
-        )
-        if connection.is_connected():
-            print("Database connection successful")
-            connection.close()
-    except Error as e:
-        raise Exception(f"Database connection failed: {e}")
-
-
-def fetch_vietnam_trending():
-    """Fetch trending videos for Vietnam"""
-    print("Fetching trending videos for Vietnam (VN)")
-    run_etl(region_code='VN', max_results=50)
-
-
-def generate_daily_report():
-    """Generate daily analytics report"""
-    import mysql.connector
-    from datetime import date
+    def task_extract_wrapper(**context):
+        file_path = extract_to_datalake(region_code='VN', max_results=50)
+        context['ti'].xcom_push(key='raw_json_path', value=file_path)
     
-    connection = mysql.connector.connect(
-        host=os.getenv('MYSQL_HOST', 'mysql'),
-        database=os.getenv('MYSQL_DATABASE', 'youtube_trending'),
-        user=os.getenv('MYSQL_USER', 'youtube_user'),
-        password=os.getenv('MYSQL_PASSWORD', 'youtube_pass123')
+    extract_task = PythonOperator(
+        task_id = 'extract_to_datalake',
+        python_callable = task_extract_wrapper,
+        provide_context = True
     )
+
+    def task_load_wrapper(**context):
+        file_path = context['ti'].xcom_pull(key='raw_json_path', task_ids='extract_to_datalake')
+        if not file_path:
+            raise ValueError("No file path received from extract task")
+        
+        load_from_datalake_to_warehouse(file_path)
     
-    cursor = connection.cursor(dictionary=True)
-    
-    # Get today's statistics
-    query = """
-    SELECT * FROM daily_statistics 
-    WHERE stat_date = CURDATE()
-    """
-    cursor.execute(query)
-    stats = cursor.fetchone()
-    
-    if stats:
-        print("=" * 50)
-        print(f"Daily Report - {stats['stat_date']}")
-        print("=" * 50)
-        print(f"Total Videos: {stats['total_videos']}")
-        print(f"Total Views: {stats['total_views']:,}")
-        print(f"Total Likes: {stats['total_likes']:,}")
-        print(f"Total Comments: {stats['total_comments']:,}")
-        print(f"Avg Views/Video: {stats['avg_views_per_video']:,.2f}")
-        print(f"Most Popular Category: {stats['most_popular_category']}")
-        print("=" * 50)
-    
-    cursor.close()
-    connection.close()
+    load_task = PythonOperator (
+        task_id = 'load_to_warehouse',
+        python_callable = task_load_wrapper,
+        provide_context = True 
+    )
 
-
-# Task 1: Check prerequisites
-task_check_api = PythonOperator(
-    task_id='check_api_key',
-    python_callable=check_api_key,
-    dag=dag,
-)
-
-task_check_db = PythonOperator(
-    task_id='check_database',
-    python_callable=check_database_connection,
-    dag=dag,
-)
-
-# Task 2: Fetch trending videos for Vietnam
-task_fetch_vn = PythonOperator(
-    task_id='fetch_vietnam_trending',
-    python_callable=fetch_vietnam_trending,
-    dag=dag,
-)
-
-# Task 3: Generate daily report
-task_report = PythonOperator(
-    task_id='generate_daily_report',
-    python_callable=generate_daily_report,
-    dag=dag,
-)
-
-# Task 4: Data quality check
-task_quality_check = BashOperator(
-    task_id='data_quality_check',
-    bash_command='''
-    echo "Running data quality checks..."
-    echo "Checking for duplicate entries..."
-    echo "Validating data types..."
-    echo "Data quality check completed!"
-    ''',
-    dag=dag,
-)
-
-# Define task dependencies
-[task_check_api, task_check_db] >> task_fetch_vn >> task_quality_check >> task_report
+    extract_task >> load_task
