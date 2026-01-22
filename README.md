@@ -1,238 +1,106 @@
-# 🎬 YouTube Trending Data Pipeline
+# 🚀 YouTube Trending Content Strategy Pipeline
 
-![Project Status](https://img.shields.io/badge/status-active-success.svg)
-![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Python](https://img.shields.io/badge/Python-3.10-blue.svg)
+![Airflow](https://img.shields.io/badge/Apache%20Airflow-2.7-orange.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1.svg)
+![Superset](https://img.shields.io/badge/Superset-Visualization-success.svg)
 
-> A fully automated data engineering pipeline that extracts YouTube trending videos, processes the data, and provides actionable insights through interactive dashboards.
+> **From Data to Viral:** An end-to-end data engineering project that helps Content Creators optimize their strategy by analyzing YouTube Trending metrics.
 
-## 📊 Project Overview
+---
 
-This project demonstrates an end-to-end data pipeline using modern data engineering tools:
+## 🎯 1. Business Problem & Solution
 
-- **Automated Data Collection**: Fetches trending videos daily from YouTube Data API
-- **ETL Pipeline**: Transforms and loads data into MySQL with data quality checks
-- **Workflow Orchestration**: Scheduled and monitored with Apache Airflow
-- **Data Visualization**: Interactive dashboards built with Apache Superset
-- **Containerized Deployment**: Fully dockerized for easy deployment
+### The Challenge
+For YouTubers and Marketing Agencies, getting into the "Trending" tab is a goldmine. However, the YouTube algorithm is a "black box." Creators often struggle with:
+* **Timing:** Not knowing which video topics are rising *right now*.
+* **Clickbait vs. Quality:** High views don't always mean high engagement.
+* **Trend Volatility:** Hard to track real-time changes in rank and metadata (titles/thumbnails).
 
-## 🏗️ Architecture
+### The Solution
+This project builds an automated pipeline to scrape, store, and analyze trending data daily. It transforms raw metrics into actionable **Content Strategies**.
 
-```
-┌─────────────┐
-│ YouTube API │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐     ┌─────────┐     ┌──────────────┐
-│   Airflow   │────▶│  MySQL  │────▶│   Superset   │
-│ (Scheduler) │     │ (Store) │     │ (Visualize)  │
-└─────────────┘     └─────────┘     └──────────────┘
-       │
-       ▼
-    Docker Compose
-```
+### 📊 Key Insights (Current MVP)
+Currently, the system provides 3 core metrics to aid decision-making:
 
-## 🛠️ Tech Stack
+1.  **🚀 Top Viral Velocity (Growth Rate):**
+    * *Question:* Which videos are gaining views the fastest in the last 24h?
+    * *Value:* Helps identify "rising stars" to react to, rather than just looking at cumulative views.
+2.  **🔥 Trending Categories:**
+    * *Question:* Which content categories (Music, Gaming, News) dominate the top charts?
+    * *Value:* Helps creators choose the right niche for their next video.
+3.  **❤️ Engagement Rate High-Score:**
+    * *Question:* Which videos have the highest (Like + Comment) / View ratio?
+    * *Value:* Identifies high-quality content that truly resonates with audiences, filtering out empty "clickbait."
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Data Source** | YouTube Data API v3 | Extract trending videos data |
-| **Orchestration** | Apache Airflow 2.7.3 | Schedule and monitor ETL jobs |
-| **ETL** | Python (pandas, requests) | Data transformation and loading |
-| **Database** | MySQL 8.0 | Store structured data |
-| **Visualization** | Apache Superset 3.0 | Interactive dashboards |
-| **Deployment** | Docker Compose | Container orchestration |
+---
 
-## ✨ Features
+## 🛠️ 2. Tech Stack
 
-- ✅ **Automated Daily Pipeline**: Runs every day at 9 AM
-- ✅ **Multi-Region Support**: Fetch data from multiple countries
-- ✅ **Error Handling**: Retry mechanism with exponential backoff
-- ✅ **Data Quality**: Validation, deduplication, and statistics tracking
-- ✅ **Real-time Monitoring**: Airflow UI for pipeline monitoring
-- ✅ **Interactive Dashboards**: 7+ visualizations for insights
-- ✅ **Scalable Architecture**: Easy to extend and modify
+| Component | Technology | Role & Responsibility |
+|-----------|-----------|-----------------------|
+| **Ingestion** | **Python (Google API Client)** | Fetches data from YouTube Data API v3. |
+| **Orchestration** | **Apache Airflow** | Schedules daily workflows, manages retries and dependencies. |
+| **Storage (Raw)** | **Data Lake (Local/Mounted)** | Stores raw JSON files for audit trails and reprocessing capabilities. |
+| **Storage (Curated)** | **MySQL (Star Schema)** | Stores structured data with **SCD Type 2** logic. |
+| **Visualization** | **Apache Superset** | Interactive dashboards for business insights. |
+| **Infrastructure** | **Docker Compose** | Containerizes the entire stack for reproducible deployment. |
 
-## 📸 Screenshots
+---
 
-### Airflow DAG
-![Airflow DAG](dashboards/airflow-dag-img.bmp)
+## 🔄 3. Data Architecture & Flow
 
-### Superset Dashboard
-![Dashboard](dashboards/youtube-2025-10-10T08-53-37.364Z.jpg)
+The pipeline follows a modern **ELT (Extract - Load - Transform)** pattern with a Data Lake layer.
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Docker Desktop
-- Python 3.10+
-- YouTube Data API Key ([Get it here](https://console.cloud.google.com/))
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/meep2k3/youtube-trending-pipeline.git
-   cd youtube-trending-pipeline
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   # Copy example and fill in your values
-   copy .env.example .env
-   
-   # Generate keys (Windows)
-   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-   python -c "import secrets; print(secrets.token_urlsafe(32))"
-   ```
-
-3. **Start the pipeline**
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Access the applications**
-   - **Airflow**: http://localhost:8080 (admin/admin)
-   - **Superset**: http://localhost:8088 (admin/admin)
-   - **MySQL**: localhost:3307
-
-### Verify Installation
-
-```bash
-# Check all containers are running
-docker-compose ps
-
-# Run test script
-python test_system.py
-
-# Trigger DAG manually in Airflow UI
+```mermaid
+graph LR
+    A[YouTube API] -->|Extract JSON| B(Data Lake / Local Storage)
+    B -->|Parse & SCD Logic| C[(MySQL Data Warehouse)]
+    C -->|SQL View| D[Superset Dashboard]
 ```
 
-## 📊 Data Schema
+### 🔹 Step 1: Data Lake (Raw Layer)
+* Instead of loading directly into the DB, raw data is fetched from the API and saved as **JSON files** in a mounted volume (`/datalake`).
+* **Benefit:** Allows re-processing of historical data if logic changes, without calling the API again (saving quota).
 
-### trending_videos Table
+### 🔹 Step 2: Data Warehouse (Serving Layer)
+* Data is parsed from JSON and loaded into **MySQL**.
+* **Modeling:** Implemented **Star Schema**.
+    * **Fact Table:** `fact_trending_daily` (Transactional metrics: views, rank, growth).
+    * **Dimension Table:** `dim_video_scd` (Video metadata).
+* **⭐ Highlight: SCD Type 2 (Slowly Changing Dimension):**
+    * The system tracks changes in **Video Titles** and **Thumbnails**.
+    * If a YouTuber changes a title to optimize clicks, the system keeps *both* the old and new versions, allowing us to analyze the effectiveness of the change.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| video_id | VARCHAR(255) | Unique video identifier |
-| title | VARCHAR(500) | Video title |
-| channel_title | VARCHAR(255) | Channel name |
-| view_count | BIGINT | Number of views |
-| like_count | BIGINT | Number of likes |
-| category_name | VARCHAR(100) | Video category |
-| trending_date | DATE | Date when trending |
+---
 
-See [init_db.sql](scripts/init_db.sql) for complete schema.
+## ⚡ 4. Airflow DAG Workflow
 
-## 📈 Pipeline Workflow
+The pipeline is orchestrated by the DAG `youtube_content_strategy_pipeline`, consisting of two main tasks connected via **XCom**:
 
-1. **Extract**: Fetch trending videos from YouTube API
-2. **Transform**: Clean, validate, and enrich data
-3. **Load**: Insert into MySQL with deduplication
-4. **Aggregate**: Calculate daily statistics
-5. **Monitor**: Track success/failure in Airflow
+![Airflow Pipeline](images/airflow_pipeline.png)
 
-## 🧪 Testing
+1.  **`extract_to_datalake`**:
+    * Calls YouTube API.
+    * Saves `raw_VN_YYYYMMDD.json` to the Data Lake.
+    * Pushes the file path to XCom.
+2.  **`load_to_warehouse`**:
+    * Pulls the file path from XCom.
+    * Checks for SCD Type 2 changes (Insert vs Update).
+    * Loads metrics into Fact tables.
 
-```bash
-# Run system tests
-python test_system.py
+---
 
-# Test individual components
-docker exec -it airflow_standalone python /opt/airflow/scripts/etl_youtube.py
+## 📈 5. Dashboards & Results
 
-# Check data quality
-docker exec -it youtube_mysql mysql -u youtube_user -p
-```
+### A. Viral Velocity & Engagement
+*Captures the fastest-growing videos and highest-quality audience interaction.*
 
-## 📝 Project Structure
+![Viral Velocity](images/viral_velocity.png)
+![Dashboard Growth](images/dashboard_growth_engagement.png)
 
-```
-youtube-trending-pipeline/
-├── dags/
-│   └── youtube_trending_dag.py    # Airflow DAG definition
-├── scripts/
-│   ├── etl_youtube.py             # ETL logic
-│   └── init_db.sql                # Database schema
-├── dashboards/                    # Project screenshots
-├── docker-compose.yml             # Container orchestration
-├── requirements.txt               # Python dependencies
-├── .env.example                   # Environment template
-├── .gitignore                     # Git ignore rules
-└── README.md                      # This file
-```
+### B. Category Dominance
+*Breakdown of top trending categories by total view share.*
 
-## 🔧 Configuration
-
-### Change Data Collection Frequency
-
-Edit `dags/youtube_trending_dag.py`:
-```python
-schedule_interval='0 9 * * *'  # Daily at 9 AM
-# Change to: '0 */6 * * *' for every 6 hours
-```
-
-## 🐛 Troubleshooting
-
-### Containers won't start
-```bash
-docker-compose down -v
-docker-compose up -d --build
-```
-
-### API quota exceeded
-- Reduce `max_results` in DAG
-- Decrease collection frequency
-- Quota resets daily at 12:00 AM PST
-
-### More issues?
-Check [STEP_BY_STEP_GUIDE.md](STEP_BY_STEP_GUIDE.md) for detailed troubleshooting.
-
-## 🚀 Future Enhancements
-
-- [ ] Real-time streaming with Kafka
-- [ ] Sentiment analysis on video titles
-- [ ] ML model for trend prediction
-- [ ] Multi-cloud deployment (AWS/GCP/Azure)
-- [ ] CI/CD pipeline with GitHub Actions
-- [ ] Data quality monitoring with Great Expectations
-
-## 📚 Documentation
-
-- [API Documentation](https://developers.google.com/youtube/v3)
-- [Airflow Documentation](https://airflow.apache.org/docs/)
-- [Superset Documentation](https://superset.apache.org/docs/intro)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License 
-
-## 👤 Author
-
-**Your Name**
-- GitHub: [@meep2k3](https://github.com/meep2k3)
-- Email: vinhquyen0401@gmail.com
-
-## 🙏 Acknowledgments
-
-- YouTube Data API for providing trending data
-- Apache Software Foundation for Airflow and Superset
-- Docker community for containerization tools
-
-## 📞 Contact
-
-For questions or feedback, please open an issue or contact me directly.
-
+![Dashboard Category](images/dashboard_category.png)
