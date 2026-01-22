@@ -74,6 +74,7 @@ services:
       - ./plugins:/opt/airflow/plugins
       - ./scripts:/opt/airflow/scripts
       - ./requirements.txt:/requirements.txt
+      - ./datalake:/opt/airflow/datalake
     ports:
       - "8080:8080"
     networks:
