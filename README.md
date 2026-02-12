@@ -79,7 +79,7 @@ graph LR
 
 The pipeline is orchestrated by the DAG `youtube_content_strategy_pipeline`, consisting of two main tasks connected via **XCom**:
 
-![Airflow Pipeline](images/airflow_pipeline.png)
+![Airflow Pipeline](https://github.com/meep2k3/youtube-trending-pipeline/blob/main/dashboards/airflow.bmp)
 
 1.  **`extract_to_datalake`**:
     * Calls YouTube API.
@@ -97,10 +97,10 @@ The pipeline is orchestrated by the DAG `youtube_content_strategy_pipeline`, con
 ### A. Viral Velocity & Engagement
 *Captures the fastest-growing videos and highest-quality audience interaction.*
 
-![Viral Velocity](images/viral_velocity.png)
-![Dashboard Growth](images/dashboard_growth_engagement.png)
+![Viral Velocity](https://github.com/meep2k3/youtube-trending-pipeline/blob/main/dashboards/top-viral-velocity-2026-01-22T11-29-33.310Z.jpg)
+![Dashboard Growth](https://github.com/meep2k3/youtube-trending-pipeline/blob/main/dashboards/engagement-rate-high-score-2026-01-22T11-30-03.136Z.jpg)
 
 ### B. Category Dominance
 *Breakdown of top trending categories by total view share.*
 
-![Dashboard Category](images/dashboard_category.png)
+![Dashboard Category](https://github.com/meep2k3/youtube-trending-pipeline/blob/main/dashboards/trending-category-2026-01-22T11-29-54.495Z.jpg)
